@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MKG101 — Ôn Thi Trắc Nghiệm</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --gold: #f4c430;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(124,92,252,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(252,92,125,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 40px 0 30px;
+  }
+
+  .header .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .header h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-num.correct-num { color: var(--correct); }
+  .stat-num.wrong-num { color: var(--wrong); }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .progress-info span:first-child { color: var(--muted); }
+  .progress-info span:last-child {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+  }
+
+  .progress-bar {
+    background: var(--border);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.4s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .q-text {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  /* Options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(124,92,252,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-label {
+    min-width: 32px;
+    height: 32px;
+    background: var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  /* Correct state */
+  .option-btn.correct {
+    background: rgba(34,197,94,0.12);
+    border-color: var(--correct);
+    animation: correctPop 0.4s ease;
+  }
+  .option-btn.correct .option-label {
+    background: var(--correct);
+    color: white;
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  /* Wrong state */
+  .option-btn.wrong {
+    background: rgba(239,68,68,0.1);
+    border-color: var(--wrong);
+    animation: wrongShake 0.4s ease;
+  }
+  .option-btn.wrong .option-label {
+    background: var(--wrong);
+    color: white;
+  }
+
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* Show correct after wrong */
+  .option-btn.show-correct {
+    background: rgba(34,197,94,0.08);
+    border-color: rgba(34,197,94,0.5);
+  }
+  .option-btn.show-correct .option-label {
+    background: rgba(34,197,94,0.4);
+    color: white;
+  }
+
+  /* Feedback */
+  .feedback {
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback.correct-fb {
+    display: block;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+  }
+
+  .feedback.wrong-fb {
+    display: block;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+  }
+
+  .feedback-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .feedback-title.correct-title { color: var(--correct); }
+  .feedback-title.wrong-title { color: var(--wrong); }
+
+  .feedback-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Next button */
+  .next-btn {
+    display: none;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124,92,252,0.4);
+  }
+
+  .next-btn.visible { display: block; }
+
+  /* Shuffle / controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: var(--muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctrl-btn:hover, .ctrl-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(124,92,252,0.08);
+  }
+
+  /* Completion screen */
+  .completion {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: slideIn 0.5s ease;
+  }
+
+  .completion.visible { display: block; }
+
+  .completion .trophy {
+    font-size: 72px;
+    margin-bottom: 20px;
+    animation: bounce 1s ease infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+  }
+
+  .completion h2 {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  .completion p { color: var(--muted); margin-bottom: 30px; }
+
+  .score-big {
+    font-family: 'Space Mono', monospace;
+    font-size: 64px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--correct), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 30px;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 16px 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(124,92,252,0.5);
+  }
+
+  /* Confetti particle */
+  .particle {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .question-card { padding: 20px; }
+    .q-text { font-size: 15px; }
+    .option-btn { font-size: 14px; padding: 13px 16px; }
+    .stats-bar .stat { min-width: 80px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">✦ Quizlet Mode ✦</div>
+    <h1>MKG101<br>Ôn Thi Cuối Kỳ</h1>
+    <p>348 câu hỏi trắc nghiệm · Click đáp án để kiểm tra</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="totalStat">348</div>
+      <div class="stat-label">Tổng câu</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="doneStat">0</div>
+      <div class="stat-label">Đã trả lời</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num correct-num" id="correctStat">0</div>
+      <div class="stat-label">Đúng ✓</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num wrong-num" id="wrongStat">0</div>
+      <div class="stat-label">Sai ✗</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>Tiến độ</span>
+      <span id="progressText">0 / 348</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" onclick="shuffleQuestions()" id="shuffleBtn">🔀 Xáo trộn</button>
+    <button class="ctrl-btn" onclick="resetQuiz()" id="resetBtn">↺ Bắt đầu lại</button>
+    <button class="ctrl-btn" id="modeBtn" onclick="toggleMode()">📖 Chỉ câu sai</button>
+  </div>
+
+  <div id="quizArea">
+    <div class="question-card" id="questionCard">
+      <div class="q-number" id="qNumber">CÂU 1 / 348</div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="feedback" id="feedback">
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div class="feedback-body" id="feedbackBody"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Câu tiếp theo →</button>
+  </div>
+
+  <div class="completion" id="completionScreen">
+    <div class="trophy">🏆</div>
+    <h2>Hoàn Thành!</h2>
+    <p>Bạn đã hoàn thành toàn bộ bộ câu hỏi MKG101</p>
+    <div class="score-big" id="finalScore">0%</div>
+    <p id="finalDetail" style="margin-bottom:30px;color:#888"></p>
+    <button class="restart-btn" onclick="resetQuiz()">Ôn lại từ đầu</button>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  {q:"Which term is defined as 'a group of people working together in a structured and coordinated fashion to achieve a set of goals'?",opts:["Organizing","Management","Organization","Efficiency"],ans:2},
+  {q:"Which term is defined as 'the process of planning, organizing, leading, and controlling an organization's resources to achieve its goals'?",opts:["Efficiency","Interpersonal skills","Management","Conceptual skills"],ans:2},
+  {q:"Which term is defined as 'using resources wisely and in a cost-effective way'?",opts:["Management","Interpersonal skills","Planning","Efficiency"],ans:3},
+  {q:"Which term is defined as 'making the right decisions and successfully implementing them'?",opts:["Effectiveness","Interpersonal skills","Controlling","Planning"],ans:0},
+  {q:"Which term is defined as 'deciding what goals to pursue and how to achieve them'?",opts:["Controlling","Planning","Organization","Efficiency"],ans:1},
+  {q:"Which term is defined as 'determining how best to group activities and resources'?",opts:["Leading","Management","Effectiveness","Organizing"],ans:3},
+  {q:"Which term is defined as 'motivating members of the organization to work in the best interests of the organization'?",opts:["Planning","Organizing","Conceptual skills","Leading"],ans:3},
+  {q:"Which term is defined as 'monitoring and correcting ongoing activities to facilitate goal attainment'?",opts:["Leading","Interpersonal skills","Management","Controlling"],ans:3},
+  {q:"Which term is defined as 'skills needed to perform specialized tasks'?",opts:["Conceptual skills","Organizing","Effectiveness","Technical skills"],ans:3},
+  {q:"Which term is defined as 'the ability to communicate with, understand, and motivate individuals and groups'?",opts:["Effectiveness","Management","Planning","Interpersonal skills"],ans:3},
+  {q:"Which term is defined as 'the ability to think in abstract terms and see how parts fit together'?",opts:["Efficiency","Conceptual skills","Controlling","Organizing"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Introduction to Management?",opts:["Efficiency","Management","Benchmarking","Effectiveness"],ans:2},
+  {q:"Which management function focuses on deciding what goals to pursue and how to achieve them?",opts:["Controlling","Planning","Leading","Organizing"],ans:1},
+  {q:"Which management function focuses on motivating employees to work in the organization's best interests?",opts:["Leading","Organizing","Controlling","Planning"],ans:0},
+  {q:"A manager who minimizes waste and uses resources wisely is emphasizing ______.",opts:["Effectiveness","Efficiency","Specialization","Control"],ans:1},
+  {q:"Making the right decisions and successfully carrying them out reflects ______.",opts:["Efficiency","Delegation","Effectiveness","Centralization"],ans:2},
+  {q:"Which skill becomes especially important when managers must see the organization as a whole?",opts:["Clerical skills","Mechanical skills","Technical skills","Conceptual skills"],ans:3},
+  {q:"The four basic management functions are planning, organizing, leading, and ______.",opts:["Budgeting","Benchmarking","Controlling","Staffing"],ans:2},
+  {q:"The ability to perform a specialized task is most closely associated with ______.",opts:["Political skills","Interpersonal skills","Technical skills","Conceptual skills"],ans:2},
+  {q:"The ability to understand and motivate people is most closely associated with ______.",opts:["Interpersonal skills","Technical skills","Diagnostic skills","Quantitative skills"],ans:0},
+  {q:"When a manager groups jobs and allocates resources, the manager is performing the ______ function.",opts:["Leading","Organizing","Controlling","Planning"],ans:1},
+  {q:"Which term is defined as 'a statement of an organization's fundamental purpose'?",opts:["Mission","SWOT analysis","Strategy","Contingency plan"],ans:0},
+  {q:"Which term is defined as 'a goal set by and for top management that focuses on broad general issues'?",opts:["Contingency plan","SWOT analysis","Strategic goal","Tactical plan"],ans:2},
+  {q:"Which term is defined as 'a plan aimed at achieving tactical goals, developed by middle managers'?",opts:["Tactical plan","Contingency plan","Operational plan","Strategic goal"],ans:0},
+  {q:"Which term is defined as 'a plan focused on carrying out tactical plans to achieve operational goals'?",opts:["Operational plan","Strategic goal","Single-use plan","SWOT analysis"],ans:0},
+  {q:"Which term is defined as 'an analysis of organizational strengths, weaknesses, opportunities, and threats'?",opts:["Contingency plan","Goal","Mission","SWOT analysis"],ans:3},
+  {q:"Which term is defined as 'a comprehensive plan for achieving an organization's goals'?",opts:["Strategic goal","Contingency plan","Strategy","Tactical plan"],ans:2},
+  {q:"Which term is defined as 'an alternative plan developed for use if circumstances change'?",opts:["Standing plan","Contingency plan","SWOT analysis","Mission"],ans:1},
+  {q:"Which term is defined as 'a plan designed to carry out a course of action not likely to be repeated'?",opts:["SWOT analysis","Strategic goal","Single-use plan","Operational plan"],ans:2},
+  {q:"Which term is defined as 'a plan developed for activities that occur repeatedly over time'?",opts:["Mission","Single-use plan","Strategy","Standing plan"],ans:3},
+  {q:"Which term is defined as 'a target or end result that an organization wants to achieve'?",opts:["Mission","Operational plan","Strategic goal","Goal"],ans:3},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Planning and Strategic Management?",opts:["Tactical plan","Benchmarking","Operational plan","Strategic goal"],ans:1},
+  {q:"A statement explaining why an organization exists is its ______.",opts:["Mission","Budget","Policy","Strategy"],ans:0},
+  {q:"An analysis of strengths, weaknesses, opportunities, and threats is called ______.",opts:["SWOT analysis","Forecasting","Delegation","Benchmarking"],ans:0},
+  {q:"A broad plan for achieving organizational goals is called ______.",opts:["Schedule","Strategy","Rule","Procedure"],ans:1},
+  {q:"Plans developed by middle managers to implement strategic goals are ______.",opts:["Tactical plans","Contingency controls","Mission statements","Operational plans"],ans:0},
+  {q:"A budget created for a one-time project is best classified as a ______.",opts:["Standing plan","Policy","Rule","Single-use plan"],ans:3},
+  {q:"Rules and standard procedures used repeatedly are part of a ______.",opts:["Contingency plan","Strategic alliance","Single-use plan","Standing plan"],ans:3},
+  {q:"Goals provide guidance, motivation, and a basis for ______.",opts:["Reengineering and staffing","Evaluation and control","Socialization and mentoring","Outsourcing and downsizing"],ans:1},
+  {q:"Goals set by top managers that focus on broad issues are called ______ goals.",opts:["Operational","Routine","Daily","Strategic"],ans:3},
+  {q:"Which term is defined as 'the degree to which the overall task of the organization is broken into smaller component parts'?",opts:["Chain of command","Departmentalization","Job specialization","Delegation"],ans:2},
+  {q:"Which term is defined as 'the grouping of jobs according to some logical arrangement'?",opts:["Departmentalization","Delegation","Formalization","Span of management"],ans:0},
+  {q:"Which term is defined as 'the process of assigning a task to a subordinate'?",opts:["Chain of command","Formalization","Delegation","Decentralization"],ans:2},
+  {q:"Which term is defined as 'the power inherent in a managerial position to make decisions'?",opts:["Authority","Decentralization","Departmentalization","Delegation"],ans:0},
+  {q:"Which term is defined as 'the clear and distinct line of authority among positions in an organization'?",opts:["Chain of command","Job specialization","Departmentalization","Bureaucratic organization"],ans:0},
+  {q:"Which term is defined as 'the number of subordinates who report directly to a manager'?",opts:["Span of management","Bureaucratic organization","Authority","Departmentalization"],ans:0},
+  {q:"Which term is defined as 'the concentration of decision-making authority at higher levels'?",opts:["Departmentalization","Centralization","Delegation","Decentralization"],ans:1},
+  {q:"Which term is defined as 'the process of systematically delegating power and authority throughout the organization'?",opts:["Departmentalization","Formalization","Centralization","Decentralization"],ans:3},
+  {q:"Which term is defined as 'the degree to which jobs are standardized within an organization'?",opts:["Formalization","Authority","Departmentalization","Bureaucratic organization"],ans:0},
+  {q:"Which term is defined as 'the degree to which rules, procedures, and communications are written'?",opts:["Formalization","Authority","Departmentalization","Bureaucratic organization"],ans:0},
+  {q:"Which term is defined as 'an organization characterized by rules, hierarchy, and impersonal relationships'?",opts:["Centralization","Bureaucratic organization","Job specialization","Authority"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Organization Structure and Design?",opts:["Departmentalization","Authority","Delegation","Benchmarking"],ans:3},
+  {q:"Breaking work into smaller, specialized tasks is called ______.",opts:["Job specialization","Integration","Delegation","Formalization"],ans:0},
+  {q:"Grouping jobs by function, product, customer, or geography is called ______.",opts:["Delegation","Coordination","Departmentalization","Centralization"],ans:2},
+  {q:"When a manager assigns responsibility to a subordinate, the manager is using ______.",opts:["Scalar chaining","Formalization","Delegation","Specialization"],ans:2},
+  {q:"The formal right to make decisions is known as ______.",opts:["Responsibility","Informality","Authority","Accountability"],ans:2},
+  {q:"A clear line of authority from top to bottom is the ______.",opts:["Task force","Chain of command","Grapevine","Matrix"],ans:1},
+  {q:"The number of employees reporting directly to one manager is the manager's ______.",opts:["Workload ratio","Level of control","Unity of direction","Span of management"],ans:3},
+  {q:"When important decisions are kept at the top of the organization, the structure is highly ______.",opts:["Informal","Organic","Centralized","Decentralized"],ans:2},
+  {q:"An organization with extensive written rules and procedures is highly ______.",opts:["Decentralized","Formalized","Divisional","Virtual"],ans:1},
+  {q:"A structure with many rules, hierarchy, and impersonal relationships reflects a ______ organization.",opts:["Boundaryless","Bureaucratic","Team-based","Network"],ans:1},
+  {q:"Which term is defined as 'the set of forces that causes people to behave in certain ways'?",opts:["Reinforcement","Motivation","ERG theory","Goal-setting theory"],ans:1},
+  {q:"Which term is defined as 'a theory suggesting that people try to satisfy lower-level needs before higher-level needs'?",opts:["Expectancy theory","Reinforcement","Maslow's hierarchy","Two-factor theory"],ans:2},
+  {q:"Which term is defined as 'Alderfer's theory grouping needs into existence, relatedness, and growth'?",opts:["Reinforcement","Job enrichment","Goal-setting theory","ERG theory"],ans:3},
+  {q:"Which term is defined as 'Herzberg's theory distinguishing motivators from hygiene factors'?",opts:["Two-factor theory","Equity theory","Reward system","Maslow's hierarchy"],ans:0},
+  {q:"Which term is defined as 'a process theory stating that motivation depends on effort-to-performance and performance-to-outcome expectations'?",opts:["Expectancy theory","Reinforcement","Motivation","ERG theory"],ans:0},
+  {q:"Which term is defined as 'a theory stating that people compare their inputs and outcomes with those of others'?",opts:["ERG theory","Equity theory","Goal-setting theory","Job enrichment"],ans:1},
+  {q:"Which term is defined as 'the process of changing behavior through rewards and punishments'?",opts:["Expectancy theory","Reward system","Equity theory","Reinforcement"],ans:3},
+  {q:"Which term is defined as 'the idea that specific and challenging goals can improve performance'?",opts:["Goal-setting theory","Reward system","Equity theory","Maslow's hierarchy"],ans:0},
+  {q:"Which term is defined as 'increasing a job's depth by adding responsibility and meaning'?",opts:["Job enrichment","Two-factor theory","Maslow's hierarchy","Equity theory"],ans:0},
+  {q:"Which term is defined as 'the formal and informal mechanisms by which organizations define and distribute rewards'?",opts:["Motivation","Reward system","Expectancy theory","Goal-setting theory"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Motivation and Performance?",opts:["Two-factor theory","Benchmarking","ERG theory","Maslow's hierarchy"],ans:1},
+  {q:"According to Maslow, people generally try to satisfy ______ needs before higher-level needs.",opts:["Social","Esteem","Lower-level","Growth"],ans:2},
+  {q:"Alderfer grouped needs into existence, relatedness, and ______.",opts:["Security","Growth","Power","Autonomy"],ans:1},
+  {q:"Herzberg's theory separates ______ factors from hygiene factors.",opts:["Equity","Expectancy","Disciplinary","Motivator"],ans:3},
+  {q:"The theory that people compare their outcomes-to-inputs ratio with others is ______ theory.",opts:["Reinforcement","Goal-setting","Expectancy","Equity"],ans:3},
+  {q:"The theory that specific, challenging goals can improve performance is ______ theory.",opts:["Equity","ERG","Goal-setting","Trait"],ans:2},
+  {q:"Changing behavior through rewards and punishments is called ______.",opts:["Forecasting","Reinforcement","Job rotation","Benchmarking"],ans:1},
+  {q:"Increasing a job's depth and responsibility is called ______.",opts:["Downsizing","Specialization","Job enrichment","Work simplification"],ans:2},
+  {q:"A process theory emphasizing effort-performance-outcome links is ______ theory.",opts:["Two-factor","ERG","Trait","Expectancy"],ans:3},
+  {q:"The set of forces causing a person to behave in a certain way is called ______.",opts:["Control","Coordination","Motivation","Delegation"],ans:2},
+  {q:"Which term is defined as 'the process of influencing others to work toward goals'?",opts:["Leadership","Leader","Political behavior","Behavioral approach"],ans:0},
+  {q:"Which term is defined as 'a person who can influence the behavior of others without relying on force'?",opts:["Behavioral approach","Leader","Situational approach","Political behavior"],ans:1},
+  {q:"Which term is defined as 'an approach that focuses on identifying personal characteristics of effective leaders'?",opts:["Political behavior","Leadership","Trait approach","Influence"],ans:2},
+  {q:"Which term is defined as 'an approach that focuses on what leaders do'?",opts:["Trait approach","Charismatic leadership","Behavioral approach","Management"],ans:2},
+  {q:"Which term is defined as 'an approach arguing that appropriate leader behavior depends on the situation'?",opts:["Trait approach","Behavioral approach","Situational approach","Political behavior"],ans:2},
+  {q:"Which term is defined as 'leadership that inspires followers to transcend self-interest for the organization'?",opts:["Charismatic leadership","Influence","Transformational leadership","Political behavior"],ans:2},
+  {q:"Which term is defined as 'leadership based on a leader's personal magnetism and inspiration'?",opts:["Situational approach","Influence","Charismatic leadership","Trait approach"],ans:2},
+  {q:"Which term is defined as 'behavior outside the formal role requirements that influences distribution of advantages and disadvantages'?",opts:["Management","Political behavior","Charismatic leadership","Transformational leadership"],ans:1},
+  {q:"Which term is defined as 'the process of planning, organizing, leading, and controlling resources'?",opts:["Trait approach","Charismatic leadership","Behavioral approach","Management"],ans:3},
+  {q:"Which term is defined as 'the ability to affect the behavior of others'?",opts:["Behavioral approach","Leadership","Influence","Trait approach"],ans:2},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Leadership and Influence?",opts:["Trait approach","Leader","Benchmarking","Behavioral approach"],ans:2},
+  {q:"Leadership is primarily concerned with ______ people toward goals.",opts:["Influencing","Auditing","Standardizing","Budgeting"],ans:0},
+  {q:"A person accepted by others as able to influence them without force is a ______.",opts:["Leader","Technician","Controller","Auditor"],ans:0},
+  {q:"The approach that studies what leaders actually do is the ______ approach.",opts:["Trait","Behavioral","Bureaucratic","Systems"],ans:1},
+  {q:"The approach that argues leadership effectiveness depends on the context is the ______ approach.",opts:["Situational","Classical","Quantitative","Trait"],ans:0},
+  {q:"A leader who inspires followers to go beyond self-interest demonstrates ______ leadership.",opts:["Transformational","Procedural","Laissez-faire","Transactional-only"],ans:0},
+  {q:"Leadership based on personal magnetism and emotional appeal is ______ leadership.",opts:["Bureaucratic","Charismatic","Mechanistic","Administrative"],ans:1},
+  {q:"Actions that try to influence the distribution of advantages outside formal role requirements are called ______ behavior.",opts:["Compliance","Political","Routine","Technical"],ans:1},
+  {q:"The approach that searches for personal qualities of effective leaders is the ______ approach.",opts:["Trait","Behavioral","Contingency-free","Network"],ans:0},
+  {q:"Compared with management, leadership places stronger emphasis on ______.",opts:["Influence and direction","Formal control only","Record keeping","Cost accounting"],ans:0},
+  {q:"Which term is defined as 'the regulation of organizational activities so as to facilitate goal attainment'?",opts:["Financial control","Control","Operations control","Budget"],ans:1},
+  {q:"Which term is defined as 'control that takes place before actual operations begin'?",opts:["Preliminary control","Control","Clan control","Bureaucratic control"],ans:0},
+  {q:"Which term is defined as 'control that takes place while operations are ongoing'?",opts:["Budget","Resistance to control","Preliminary control","Screening control"],ans:3},
+  {q:"Which term is defined as 'control that focuses on results after the action is complete'?",opts:["Operations control","Postaction control","Preliminary control","Budget"],ans:1},
+  {q:"Which term is defined as 'a plan expressed in numerical terms'?",opts:["Postaction control","Operations control","Budget","Financial control"],ans:2},
+  {q:"Which term is defined as 'control through formal and mechanistic structural arrangements'?",opts:["Bureaucratic control","Resistance to control","Financial control","Preliminary control"],ans:0},
+  {q:"Which term is defined as 'control based on shared values, beliefs, traditions, and norms'?",opts:["Postaction control","Financial control","Control","Clan control"],ans:3},
+  {q:"Which term is defined as 'control focused on financial resources and outcomes'?",opts:["Financial control","Operations control","Resistance to control","Preliminary control"],ans:0},
+  {q:"Which term is defined as 'control concerned with transforming inputs into outputs efficiently'?",opts:["Operations control","Financial control","Resistance to control","Preliminary control"],ans:0},
+  {q:"Which term is defined as 'employee opposition to regulation because it may limit autonomy or create pressure'?",opts:["Postaction control","Resistance to control","Budget","Clan control"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Control?",opts:["Benchmarking","Preliminary control","Screening control","Postaction control"],ans:1},
+  {q:"The regulation of organizational activities to help achieve goals is called ______.",opts:["Specialization","Delegation","Control","Motivation"],ans:2},
+  {q:"Control that occurs before the work actually begins is ______ control.",opts:["Feedback-only","Preliminary","Screening","Postaction"],ans:1},
+  {q:"Monitoring quality while production is taking place is an example of ______ control.",opts:["Structural","Postaction","Screening","Preliminary"],ans:2},
+  {q:"Evaluating results after a project is finished is ______ control.",opts:["Preliminary","Postaction","Screening","Simultaneous-only"],ans:1},
+  {q:"A plan expressed in numbers is a ______.",opts:["Policy","Span","Budget","Mission"],ans:2},
+  {q:"Control based on rules, hierarchy, and formal structures is ______ control.",opts:["Bureaucratic","Informal","Clan","Participative-only"],ans:0},
+  {q:"Control based on shared values and traditions is ______ control.",opts:["Bureaucratic","Financial","Clan","Preliminary"],ans:2},
+  {q:"Monitoring revenues, costs, and profits is part of ______ control.",opts:["Team-building","Financial","Leadership","Socialization"],ans:1},
+  {q:"Control aimed at managing the transformation process is ______ control.",opts:["Charismatic","Operations","Market","Symbolic"],ans:1},
+  {q:"Which term is defined as 'the process by which companies engage customers, build strong customer relationships, and create value in order to capture value from customers in return'?",opts:["Marketing myopia","Marketing","Customer value","Customer satisfaction"],ans:1},
+  {q:"Which term is defined as 'a state of felt deprivation'?",opts:["Market offering","Need","Exchange","Demand"],ans:1},
+  {q:"Which term is defined as 'the form a human need takes as shaped by culture and individual personality'?",opts:["Customer satisfaction","Want","Customer value","Exchange"],ans:1},
+  {q:"Which term is defined as 'human wants backed by buying power'?",opts:["Want","Marketing myopia","Exchange","Demand"],ans:3},
+  {q:"Which term is defined as 'some combination of products, services, information, or experiences offered to a market'?",opts:["Need","Customer satisfaction","Market offering","Market"],ans:2},
+  {q:"Which term is defined as 'focusing only on existing wants and losing sight of underlying customer needs'?",opts:["Marketing myopia","Customer satisfaction","Want","Market offering"],ans:0},
+  {q:"Which term is defined as 'the difference between the benefits a customer gains and the costs of obtaining and using a product'?",opts:["Customer satisfaction","Customer value","Marketing myopia","Want"],ans:1},
+  {q:"Which term is defined as 'the extent to which perceived performance matches a buyer's expectations'?",opts:["Marketing","Marketing myopia","Customer satisfaction","Customer value"],ans:2},
+  {q:"Which term is defined as 'the act of obtaining a desired object by offering something in return'?",opts:["Need","Marketing","Customer value","Exchange"],ans:3},
+  {q:"Which term is defined as 'the set of actual and potential buyers of a product or service'?",opts:["Want","Market","Need","Marketing"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Marketing Basics?",opts:["Need","Demand","Benchmarking","Want"],ans:2},
+  {q:"A state of felt deprivation is called a ______.",opts:["Want","Exchange","Need","Demand"],ans:2},
+  {q:"A human need shaped by culture and personality becomes a ______.",opts:["Market offering","Want","Benefit bundle","Demand"],ans:1},
+  {q:"Wants backed by buying power are called ______.",opts:["Segments","Exchanges","Needs","Demand"],ans:3},
+  {q:"A combination of products, services, information, or experiences offered to customers is a ______.",opts:["Supply chain","Market offering","Marketing channel","Price mix"],ans:1},
+  {q:"Focusing only on existing products rather than underlying customer needs is called ______.",opts:["Market skimming","Benchmarking","Demarketing","Marketing myopia"],ans:3},
+  {q:"The difference between customer benefits and customer costs is called customer ______.",opts:["Insight","Loyalty","Equity","Value"],ans:3},
+  {q:"Customer satisfaction depends on how perceived performance compares with customer ______.",opts:["Location","Segmentation","Promotion","Expectations"],ans:3},
+  {q:"Obtaining a desired object by offering something in return is called ______.",opts:["Exchange","Positioning","Outsourcing","Branding"],ans:0},
+  {q:"The process of creating value and building customer relationships to capture value in return is ______.",opts:["Departmentalization","Logistics","Marketing","Operations control"],ans:2},
+  {q:"Which term is defined as 'fresh understandings of customers and the marketplace that create value and competitive advantage'?",opts:["Causal research","Marketing information system","Customer insights","Secondary data"],ans:2},
+  {q:"Which term is defined as 'people and procedures for assessing information needs and developing needed information'?",opts:["Secondary data","Marketing information system","Primary data","Descriptive research"],ans:1},
+  {q:"Which term is defined as 'electronic collections of consumer and market information obtained from data sources within the company'?",opts:["Internal databases","Exploratory research","Primary data","Secondary data"],ans:0},
+  {q:"Which term is defined as 'systematic collection and analysis of publicly available information about competitors and developments'?",opts:["Descriptive research","Causal research","Marketing intelligence","Exploratory research"],ans:2},
+  {q:"Which term is defined as 'the systematic design, collection, analysis, and reporting of data relevant to a specific marketing situation'?",opts:["Marketing research","Secondary data","Marketing intelligence","Causal research"],ans:0},
+  {q:"Which term is defined as 'research used to gather preliminary information that helps define problems and suggest hypotheses'?",opts:["Marketing intelligence","Descriptive research","Exploratory research","Customer insights"],ans:2},
+  {q:"Which term is defined as 'research used to better describe marketing problems, situations, or markets'?",opts:["Descriptive research","Causal research","Marketing intelligence","Exploratory research"],ans:0},
+  {q:"Which term is defined as 'research used to test hypotheses about cause-and-effect relationships'?",opts:["Primary data","Customer insights","Causal research","Marketing research"],ans:2},
+  {q:"Which term is defined as 'information that already exists somewhere, having been collected for another purpose'?",opts:["Secondary data","Marketing research","Causal research","Descriptive research"],ans:0},
+  {q:"Which term is defined as 'information collected for the specific purpose at hand'?",opts:["Secondary data","Causal research","Descriptive research","Primary data"],ans:3},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Marketing Information and Research?",opts:["Marketing intelligence","Marketing information system","Benchmarking","Internal databases"],ans:2},
+  {q:"Fresh understandings of customers and markets that create value are called customer ______.",opts:["Insights","Channels","Buffers","Scores"],ans:0},
+  {q:"A system of people and procedures for developing marketing information is a marketing information ______.",opts:["System","Budget","Mix","Alliance"],ans:0},
+  {q:"Data collected inside the firm from accounting, operations, and sales records are ______ databases.",opts:["Internal","Primary","External","Causal"],ans:0},
+  {q:"The systematic collection of publicly available information about competitors is marketing ______.",opts:["Intelligence","Myopia","Screening","Positioning"],ans:0},
+  {q:"The systematic design, collection, and analysis of data for a marketing decision is marketing ______.",opts:["Research","Channeling","Targeting","Segmentation"],ans:0},
+  {q:"Research used to clarify a problem and generate ideas is ______ research.",opts:["Experimental-only","Causal","Exploratory","Descriptive"],ans:2},
+  {q:"Research that seeks to describe markets or customer characteristics is ______ research.",opts:["Exploratory","Ethnographic-only","Descriptive","Causal"],ans:2},
+  {q:"Research used to test cause-and-effect relationships is ______ research.",opts:["Exploratory","Observational-only","Causal","Descriptive"],ans:2},
+  {q:"Information already collected for another purpose is called ______ data.",opts:["Secondary","Primary","Causal","Raw"],ans:0},
+  {q:"Which term is defined as 'dividing a market into distinct groups of buyers with different needs, characteristics, or behaviors'?",opts:["Geographic segmentation","Market segmentation","Positioning","Differentiation"],ans:1},
+  {q:"Which term is defined as 'the process of evaluating each segment's attractiveness and selecting one or more segments to enter'?",opts:["Market segmentation","Target marketing","Psychographic segmentation","Demographic segmentation"],ans:1},
+  {q:"Which term is defined as 'actually differentiating the market offering to create superior customer value'?",opts:["Differentiation","Psychographic segmentation","Demographic segmentation","Market segmentation"],ans:0},
+  {q:"Which term is defined as 'arranging for a market offering to occupy a clear, distinctive, and desirable place in the minds of target consumers'?",opts:["Positioning","Demographic segmentation","Target marketing","Market segmentation"],ans:0},
+  {q:"Which term is defined as 'dividing a market into different geographic units'?",opts:["Target marketing","Psychographic segmentation","Undifferentiated marketing","Geographic segmentation"],ans:3},
+  {q:"Which term is defined as 'dividing a market based on variables such as age, gender, income, and life cycle'?",opts:["Target marketing","Concentrated marketing","Demographic segmentation","Positioning"],ans:2},
+  {q:"Which term is defined as 'dividing buyers based on social class, lifestyle, or personality'?",opts:["Differentiation","Behavioral segmentation","Psychographic segmentation","Geographic segmentation"],ans:2},
+  {q:"Which term is defined as 'dividing buyers based on knowledge, attitudes, uses, or responses'?",opts:["Behavioral segmentation","Geographic segmentation","Psychographic segmentation","Target marketing"],ans:0},
+  {q:"Which term is defined as 'a market-coverage strategy in which a firm decides to ignore segment differences and target the whole market'?",opts:["Concentrated marketing","Undifferentiated marketing","Behavioral segmentation","Differentiation"],ans:1},
+  {q:"Which term is defined as 'a strategy in which a firm goes after a large share of one or a few segments'?",opts:["Positioning","Concentrated marketing","Demographic segmentation","Target marketing"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Segmentation, Targeting, and Positioning?",opts:["Benchmarking","Positioning","Target marketing","Differentiation"],ans:0},
+  {q:"Dividing a market into distinct buyer groups is called market ______.",opts:["Positioning","Mixing","Channeling","Segmentation"],ans:3},
+  {q:"Evaluating segment attractiveness and choosing which segments to serve is called ______ marketing.",opts:["Target","Logistics","Mass","Internal"],ans:0},
+  {q:"Creating a clear place in consumers' minds for an offering is called ______.",opts:["Screening","Sourcing","Positioning","Outsourcing"],ans:2},
+  {q:"Creating superior customer value by making an offering distinct is called ______.",opts:["Differentiation","Standardization","Costing","Mediation"],ans:0},
+  {q:"Dividing markets by age, gender, income, or life-cycle stage is ______ segmentation.",opts:["Geographic","Behavioral","Demographic","International"],ans:2},
+  {q:"Dividing markets by lifestyle, personality, or social class is ______ segmentation.",opts:["Behavioral","Psychographic","Channel","Geographic"],ans:1},
+  {q:"Dividing markets by buyer knowledge, use rate, or loyalty status is ______ segmentation.",opts:["Demographic","Operational","Behavioral","Line"],ans:2},
+  {q:"A company that ignores segment differences and targets the whole market uses ______ marketing.",opts:["Micromarketing","Undifferentiated","Niche-only","Concentrated"],ans:1},
+  {q:"A company that seeks a large share of one or a few segments uses ______ marketing.",opts:["Undifferentiated","Mass-customized","Internal","Concentrated"],ans:3},
+  {q:"Which term is defined as 'anything that can be offered to a market for attention, acquisition, use, or consumption that might satisfy a want or need'?",opts:["Specialty product","Perishability","Unsought product","Product"],ans:3},
+  {q:"Which term is defined as 'an activity, benefit, or satisfaction offered for sale that is essentially intangible'?",opts:["Unsought product","Service","Brand equity","Inseparability"],ans:1},
+  {q:"Which term is defined as 'a consumer product usually bought frequently, immediately, and with minimal comparison'?",opts:["Convenience product","Product","Brand","Brand equity"],ans:0},
+  {q:"Which term is defined as 'a consumer product bought less frequently and compared on suitability, quality, price, and style'?",opts:["Inseparability","Product","Service","Shopping product"],ans:3},
+  {q:"Which term is defined as 'a consumer product with unique characteristics or brand identification for which buyers make special effort'?",opts:["Convenience product","Specialty product","Product","Shopping product"],ans:1},
+  {q:"Which term is defined as 'a consumer product that the customer either does not know about or knows about but does not normally think of buying'?",opts:["Unsought product","Inseparability","Brand equity","Service"],ans:0},
+  {q:"Which term is defined as 'a name, term, sign, symbol, design, or combination of these that identifies the maker or seller'?",opts:["Perishability","Unsought product","Inseparability","Brand"],ans:3},
+  {q:"Which term is defined as 'the differential effect that knowing the brand name has on customer response to the product'?",opts:["Brand","Brand equity","Inseparability","Convenience product"],ans:1},
+  {q:"Which term is defined as 'a service characteristic meaning services cannot be separated from their providers'?",opts:["Convenience product","Inseparability","Brand equity","Service"],ans:1},
+  {q:"Which term is defined as 'a service characteristic meaning services cannot be stored for later sale or use'?",opts:["Product","Perishability","Brand","Unsought product"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Products, Services, and Brands?",opts:["Service","Benchmarking","Shopping product","Convenience product"],ans:1},
+  {q:"Anything offered to a market that might satisfy a need or want is a ______.",opts:["Product","Channel","Segment","Research design"],ans:0},
+  {q:"An intangible activity or benefit offered for sale is a ______.",opts:["Brand line","Demand","Database","Service"],ans:3},
+  {q:"Toothpaste bought with little planning is typically a ______ product.",opts:["Convenience","Specialty","Industrial","Shopping"],ans:0},
+  {q:"Furniture compared on quality, price, and style is typically a ______ product.",opts:["Convenience","Unsought","Shopping","Impulse-only"],ans:2},
+  {q:"A Rolex watch for which buyers make special purchasing effort is a ______ product.",opts:["Unsought","Specialty","Convenience","Shopping"],ans:1},
+  {q:"Life insurance often illustrates an ______ product.",opts:["Impulse","Unsought","Specialty","Shopping"],ans:1},
+  {q:"A name or symbol that identifies a seller's offering is a ______.",opts:["Franchise","Channel","Brand","Need"],ans:2},
+  {q:"The extra value a branded product gains from consumer perceptions is brand ______.",opts:["Mix","Span","Allowance","Equity"],ans:3},
+  {q:"The service characteristic meaning a service provider and service are often linked together is ______.",opts:["Inseparability","Variability","Durability","Perishability"],ans:0},
+  {q:"The service characteristic meaning unused service capacity cannot be stored is ______.",opts:["Perishability","Ownership","Inseparability","Tangibility"],ans:0},
+  {q:"Which term is defined as 'buying a whole company, a patent, or a license to produce someone else's product'?",opts:["Product concept","Acquisition","Product life cycle","Commercialization"],ans:1},
+  {q:"Which term is defined as 'developing original products, product improvements, product modifications, and new brands'?",opts:["Business analysis","Idea screening","Product life cycle","New product development"],ans:3},
+  {q:"Which term is defined as 'the systematic search for new product ideas'?",opts:["Business analysis","Concept testing","Marketing strategy development","Idea generation"],ans:3},
+  {q:"Which term is defined as 'screening new product ideas to spot good ideas and drop poor ones'?",opts:["Idea screening","Idea generation","Commercialization","Product concept"],ans:0},
+  {q:"Which term is defined as 'a detailed version of a product idea stated in meaningful consumer terms'?",opts:["Product life cycle","Marketing strategy development","Product concept","Business analysis"],ans:2},
+  {q:"Which term is defined as 'testing new product concepts with groups of target consumers'?",opts:["Idea screening","Business analysis","Concept testing","Product life cycle"],ans:2},
+  {q:"Which term is defined as 'designing an initial marketing strategy for a new product'?",opts:["Business analysis","Marketing strategy development","Idea screening","Commercialization"],ans:1},
+  {q:"Which term is defined as 'reviewing the sales, costs, and profit projections for a new product'?",opts:["Concept testing","Marketing strategy development","Idea generation","Business analysis"],ans:3},
+  {q:"Which term is defined as 'introducing a new product into the market'?",opts:["Business analysis","Commercialization","Acquisition","Product life cycle"],ans:1},
+  {q:"Which term is defined as 'the course of a product's sales and profits over its lifetime'?",opts:["Product life cycle","Marketing strategy development","New product development","Business analysis"],ans:0},
+  {q:"Which of the following is NOT one of the key concepts emphasized in New Product Development and PLC?",opts:["Benchmarking","Idea screening","Idea generation","New product development"],ans:0},
+  {q:"Buying a company, patent, or license to get a product is called ______.",opts:["Acquisition","Commercialization","Licensing-out","Concept testing"],ans:0},
+  {q:"The systematic search for new product ideas is ______ generation.",opts:["Market","Promotion","Channel","Idea"],ans:3},
+  {q:"Dropping poor ideas early in the process is called idea ______.",opts:["Screening","Diffusion","Commercialization","Generation"],ans:0},
+  {q:"A detailed version of a product idea stated in consumer terms is a product ______.",opts:["Prototype-only","Concept","Mix","Line"],ans:1},
+  {q:"Testing product concepts with target consumers is called concept ______.",opts:["Screening","Auditing","Testing","Forecasting"],ans:2},
+  {q:"Designing the initial marketing plan for a new product is marketing strategy ______.",opts:["Segmentation","Control","Development","Allocation"],ans:2},
+  {q:"Reviewing sales, cost, and profit projections is called business ______.",opts:["Penetration","Promotion","Segmentation","Analysis"],ans:3},
+  {q:"Launching the product into the market is called ______.",opts:["Bundling","Screening","Acquisition","Commercialization"],ans:3},
+  {q:"The pattern of a product's sales and profits over time is its product life ______.",opts:["Share","Cycle","Line","Value"],ans:1},
+  {q:"Which term is defined as 'the amount of money charged for a product or service or the sum of the values exchanged for its benefits'?",opts:["High-low pricing","Variable costs","Price","EDLP"],ans:2},
+  {q:"Which term is defined as 'setting price based on buyers' perceptions of value rather than seller cost'?",opts:["Variable costs","Value-based pricing","High-low pricing","Cost-based pricing"],ans:1},
+  {q:"Which term is defined as 'setting price based on the costs of producing, distributing, and selling plus a fair return'?",opts:["Cost-based pricing","Fixed costs","EDLP","Total costs"],ans:0},
+  {q:"Which term is defined as 'offering the right combination of quality and service at a fair price'?",opts:["Total costs","Cost-based pricing","Good-value pricing","Price"],ans:2},
+  {q:"Which term is defined as 'everyday low pricing, charging a constant low price with few temporary discounts'?",opts:["EDLP","IFo","High-low pricing","Good-value pricing"],ans:0},
+  {q:"Which term is defined as 'charging higher everyday prices but running frequent promotions to lower them temporarily'?",opts:["EDLP","High-low pricing","Total costs","Value-based pricing"],ans:1},
+  {q:"Which term is defined as 'costs that do not vary with production or sales level'?",opts:["Fixed costs","Good-value pricing","EDLP","Variable costs"],ans:0},
+  {q:"Which term is defined as 'costs that vary directly with the level of production'?",opts:["Price","Variable costs","EDLP","Fixed costs"],ans:1},
+  {q:"Which term is defined as 'the sum of fixed and variable costs for a given level of production'?",opts:["Fixed costs","Price","Total costs","Variable costs"],ans:2},
+  {q:"Which term is defined as 'adding a standard markup to the cost of the product'?",opts:["Good-value pricing","Cost-plus pricing","EDLP","Total costs"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Pricing Basics?",opts:["Cost-based pricing","Benchmarking","Good-value pricing","Value-based pricing"],ans:1},
+  {q:"The amount of money charged for a product is its ______.",opts:["Allowance","Price","Promotion","Position"],ans:1},
+  {q:"Pricing based on customers' perceptions of value is ______ pricing.",opts:["Cost-based","Value-based","Allowance","Cost-plus"],ans:1},
+  {q:"Pricing based primarily on production and distribution costs is ______ pricing.",opts:["Dynamic","Psychological","Value-based","Cost-based"],ans:3},
+  {q:"Offering the right quality-service combination at a fair price is ______ pricing.",opts:["Skim","Predatory","Good-value","Captive"],ans:2},
+  {q:"Charging a constant low price with few temporary discounts is ______.",opts:["EDLP","Market skimming","Dynamic pricing","High-low pricing"],ans:0},
+  {q:"Charging higher list prices but using frequent promotions is ______ pricing.",opts:["Yield","EDLP","High-low","Cost-plus"],ans:2},
+  {q:"Rent and executive salaries are typically ______ costs.",opts:["Fixed","Marginal-only","Variable","Promotional"],ans:0},
+  {q:"Packaging and raw materials are typically ______ costs.",opts:["Sunk","Strategic","Fixed","Variable"],ans:3},
+  {q:"Adding a standard markup to cost is called ______ pricing.",opts:["Penetration","Auction","Cost-plus","Value-based"],ans:2},
+  {q:"Which term is defined as 'setting a high initial price to skim revenues layer by layer from the market'?",opts:["Product bundle pricing","Promotional pricing","Market-skimming pricing","Market-penetration pricing"],ans:2},
+  {q:"Which term is defined as 'setting a low initial price to attract many buyers quickly and win market share'?",opts:["Market-penetration pricing","Promotional pricing","Captive product pricing","Product line pricing"],ans:0},
+  {q:"Which term is defined as 'setting price steps between product line items based on cost, features, and competitor prices'?",opts:["Product bundle pricing","Product line pricing","Market-skimming pricing","Segmented pricing"],ans:1},
+  {q:"Which term is defined as 'pricing optional or accessory products sold with the main product'?",opts:["By-product pricing","Optional product pricing","Product bundle pricing","Promotional pricing"],ans:1},
+  {q:"Which term is defined as 'pricing products that must be used with the main product'?",opts:["Psychological pricing","By-product pricing","Captive product pricing","Product bundle pricing"],ans:2},
+  {q:"Which term is defined as 'setting a price for by-products to make the main product more competitive'?",opts:["Market-skimming pricing","Promotional pricing","By-product pricing","Product line pricing"],ans:2},
+  {q:"Which term is defined as 'combining several products and offering the bundle at a reduced price'?",opts:["Product bundle pricing","Product line pricing","Optional product pricing","Promotional pricing"],ans:0},
+  {q:"Which term is defined as 'selling a product at two or more prices even though the difference in price is not based on cost'?",opts:["By-product pricing","Product bundle pricing","Product line pricing","Segmented pricing"],ans:3},
+  {q:"Which term is defined as 'pricing that considers the psychology of prices rather than simply economics'?",opts:["By-product pricing","Captive product pricing","Psychological pricing","Market-skimming pricing"],ans:2},
+  {q:"Which term is defined as 'temporarily pricing products below list price to create buying excitement'?",opts:["Product bundle pricing","Segmented pricing","Promotional pricing","Optional product pricing"],ans:2},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Advanced Pricing?",opts:["Benchmarking","Product line pricing","Market-penetration pricing","Optional product pricing"],ans:0},
+  {q:"Setting a high initial price to skim revenue layers from the market is ______ pricing.",opts:["Market-penetration","Captive","Market-skimming","Segmented"],ans:2},
+  {q:"Setting a low initial price to attract many buyers quickly is ______ pricing.",opts:["Market-skimming","Psychological","Market-penetration","Optional"],ans:2},
+  {q:"Pricing accessories sold with the main product is ______ product pricing.",opts:["Line","Bundle","Optional","Captive"],ans:2},
+  {q:"Pricing printer cartridges that must be used with a printer is ______ product pricing.",opts:["Optional","By-product","Bundle","Captive"],ans:3},
+  {q:"Pricing waste or leftover materials to improve competitiveness of the main product is ______ pricing.",opts:["Penetration","Skimming","By-product","Bundle"],ans:2},
+  {q:"Offering several products together at a lower combined price is product ______ pricing.",opts:["Allowance","Bundle","Captive","Line"],ans:1},
+  {q:"Charging different prices to different customer groups when cost is the same is ______ pricing.",opts:["Fixed-cost","Mission","Segmented","Bureaucratic"],ans:2},
+  {q:"Using prices like $9.99 because of buyer perception is ______ pricing.",opts:["Penetration","Cost-plus","Psychological","Optional"],ans:2},
+  {q:"Temporary price cuts to boost short-run sales are ______ pricing.",opts:["Skimming","Bundle","Captive","Promotional"],ans:3},
+  {q:"Which term is defined as 'the network composed of the company, suppliers, distributors, and customers that partner to improve performance'?",opts:["Horizontal marketing system","Vertical marketing system","Value delivery network","Channel level"],ans:2},
+  {q:"Which term is defined as 'a set of interdependent organizations involved in making a product or service available for use or consumption'?",opts:["Vertical marketing system","Marketing channel","Value delivery network","Direct marketing channel"],ans:1},
+  {q:"Which term is defined as 'a channel with no intermediary levels'?",opts:["Marketing channel","Direct marketing channel","Channel level","Marketing logistics"],ans:1},
+  {q:"Which term is defined as 'a channel containing one or more intermediary levels'?",opts:["Vertical marketing system","Marketing logistics","Channel level","Indirect marketing channel"],ans:3},
+  {q:"Which term is defined as 'a layer of intermediaries that performs work in bringing a product closer to the final buyer'?",opts:["Channel level","Value delivery network","Marketing logistics","Supply chain management"],ans:0},
+  {q:"Which term is defined as 'a channel structure in which producers, wholesalers, and retailers act as a unified system'?",opts:["Marketing channel","Marketing logistics","Vertical marketing system","Horizontal marketing system"],ans:2},
+  {q:"Which term is defined as 'two or more companies at one level joining together to pursue a new opportunity'?",opts:["Horizontal marketing system","Direct marketing channel","Value delivery network","Vertical marketing system"],ans:0},
+  {q:"Which term is defined as 'disagreement among channel members over goals, roles, and rewards'?",opts:["Horizontal marketing system","Channel level","Channel conflict","Indirect marketing channel"],ans:2},
+  {q:"Which term is defined as 'planning, implementing, and controlling the physical flow of goods, services, and information'?",opts:["Indirect marketing channel","Supply chain management","Marketing logistics","Channel conflict"],ans:2},
+  {q:"Which term is defined as 'managing upstream and downstream value-added flows to maximize customer value'?",opts:["Vertical marketing system","Supply chain management","Channel conflict","Indirect marketing channel"],ans:1},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Marketing Channels and Logistics?",opts:["Marketing channel","Benchmarking","Direct marketing channel","Indirect marketing channel"],ans:1},
+  {q:"The broader set of partners that work together to improve value delivery is the ______ delivery network.",opts:["Control","Value","Price","Cost"],ans:1},
+  {q:"A set of interdependent organizations making a product available is a marketing ______.",opts:["Database","Orientation","Channel","Budget"],ans:2},
+  {q:"A channel with no intermediaries is a ______ marketing channel.",opts:["Hybrid-only","Indirect","Conventional","Direct"],ans:3},
+  {q:"A channel with one or more intermediaries is an ______ marketing channel.",opts:["Open-source","Internal","Direct","Indirect"],ans:3},
+  {q:"A layer of intermediaries in a channel is a channel ______.",opts:["Bundle","Level","Brand","Mix"],ans:1},
+  {q:"A channel structure in which producers, wholesalers, and retailers act as a unified system is a ______ marketing system.",opts:["Horizontal","Vertical","Bureaucratic","Informal"],ans:1},
+  {q:"When firms at the same channel level join forces, they form a ______ marketing system.",opts:["Horizontal","Clan","Vertical","Direct"],ans:0},
+  {q:"Disagreement among channel members over goals or rewards is channel ______.",opts:["Penetration","Bundling","Equity","Conflict"],ans:3},
+  {q:"Planning and controlling the physical flow of goods and information is marketing ______.",opts:["Myopia","Segmentation","Logistics","Research"],ans:2},
+  {q:"Managing upstream and downstream value-added flows is supply chain ______.",opts:["Management","Decentralization","Formalization","Screening"],ans:0},
+  {q:"Which term is defined as 'the specific blend of promotion tools a company uses to communicate customer value'?",opts:["Personal selling","Public relations","Promotion mix","Sales promotion"],ans:2},
+  {q:"Which term is defined as 'any paid form of nonpersonal presentation and promotion by an identified sponsor'?",opts:["Decoding","Public relations","Encoding","Advertising"],ans:3},
+  {q:"Which term is defined as 'short-term incentives to encourage the purchase or sale of a product or service'?",opts:["Sales promotion","Decoding","Promotion mix","Personal selling"],ans:0},
+  {q:"Which term is defined as 'personal presentations by a firm's sales force for the purpose of making sales and building relationships'?",opts:["Personal selling","Encoding","Sales promotion","Promotion mix"],ans:0},
+  {q:"Which term is defined as 'building good relations with publics by obtaining favorable publicity and handling rumors, stories, and events'?",opts:["Advertising","Sales promotion","Sender","Public relations"],ans:3},
+  {q:"Which term is defined as 'carefully integrating and coordinating all company communication channels'?",opts:["Personal selling","Encoding","Integrated marketing communications","Feedback"],ans:2},
+  {q:"Which term is defined as 'the party sending the message to another party'?",opts:["Public relations","Integrated marketing communications","Encoding","Sender"],ans:3},
+  {q:"Which term is defined as 'putting thought into symbolic form'?",opts:["Integrated marketing communications","Promotion mix","Sales promotion","Encoding"],ans:3},
+  {q:"Which term is defined as 'the process by which the receiver assigns meaning to symbols encoded by the sender'?",opts:["Decoding","Encoding","Sender","Public relations"],ans:0},
+  {q:"Which term is defined as 'the part of the receiver's response communicated back to the sender'?",opts:["Advertising","Personal selling","Feedback","Sales promotion"],ans:2},
+  {q:"Which of the following is NOT one of the key concepts emphasized in Integrated Marketing Communications?",opts:["Advertising","Sales promotion","Personal selling","Benchmarking"],ans:3},
+  {q:"The specific blend of communication tools a company uses is the promotion ______.",opts:["Span","Budget","Screen","Mix"],ans:3},
+  {q:"A paid, nonpersonal presentation by an identified sponsor is ______.",opts:["Public relations","Personal selling","Sales promotion","Advertising"],ans:3},
+  {q:"Short-term incentives such as coupons and discounts are ______ promotion.",opts:["Public","Internal","Sales","Personal"],ans:2},
+  {q:"Sales presentations by a firm's sales force are part of ______ selling.",opts:["Personal","Digital-only","Mass","Public"],ans:0},
+  {q:"Building good relations with publics and managing publicity is ______ relations.",opts:["Channel","Customer","Vertical","Public"],ans:3},
+  {q:"Which term refers to using resources wisely and minimizing costs while achieving results?",opts:["Effectiveness","Leadership","Efficiency","Organizing"],ans:2},
+  {q:"Which management function is most directly concerned with motivating employees and guiding their efforts toward goals?",opts:["Leading","Planning","Staffing","Budgeting"],ans:0},
+  {q:"Compared with first-line managers, top managers usually need a higher level of ______ skills.",opts:["Technical","Conceptual","Mechanical","Clerical"],ans:1},
+  {q:"In strategic management, a strategy is best described as ______.",opts:["A short-term routine task list","A comprehensive plan for achieving organizational goals","A reward system for employees","A report on past performance"],ans:1},
+  {q:"In a SWOT analysis, which element represents an internal positive capability?",opts:["Opportunity","Threat","Trend","Strength"],ans:3},
+  {q:"Management by Objectives (MBO) works best when managers and employees ______.",opts:["Avoid measurable targets","Jointly set specific goals and review results","Eliminate feedback sessions","Focus only on long-term vision statements"],ans:1},
+  {q:"A plan developed to respond to unexpected crises or major disruptions is called a ______ plan.",opts:["Standing","Tactical","Contingency","Operational"],ans:2},
+  {q:"A policy is best defined as ______.",opts:["A one-time financial plan","A detailed sequence of required steps","A broad guideline for decision making","An informal suggestion with no authority"],ans:2},
+  {q:"A mechanistic organizational structure is typically characterized by ______.",opts:["Low specialization and little formalization","Decentralized authority and flexible roles","High specialization and many rules","Temporary teams and free communication"],ans:2},
+  {q:"An organic organizational structure is most likely to have ______.",opts:["Rigid hierarchies and centralized decision making","Flexible jobs and decentralized authority","Narrow communication channels only","Strict chains of command with little teamwork"],ans:1},
+  {q:"The term span of control refers to ______.",opts:["The number of departments in an organization","The number of subordinates reporting to one manager","The distance between two management levels","The total size of the workforce"],ans:1},
+  {q:"The chain of command is the ______.",opts:["Group of employees with the same job title","Temporary project team reporting system","Line of authority from top to bottom of the organization","Set of rules used for budgeting decisions"],ans:2},
+  {q:"Centralization means that important decision-making authority is kept ______.",opts:["At lower organizational levels","At the top of the organization","Equally in every department","Outside the organization"],ans:1},
+  {q:"When a company groups employees into marketing, finance, operations, and human resources, it is using ______ departmentalization.",opts:["Product","Geographic","Customer","Functional"],ans:3},
+  {q:"Formalization is the extent to which jobs are governed by ______.",opts:["Employee personalities","Written rules and procedures","Customer opinions","Informal friendships"],ans:1},
+  {q:"According to Maslow, the highest level of need is ______.",opts:["Safety","Esteem","Self-actualization","Social belonging"],ans:2},
+  {q:"In Herzberg's two-factor theory, hygiene factors mainly ______.",opts:["Create deep intrinsic motivation","Prevent dissatisfaction when adequately provided","Replace the need for achievement","Increase autonomy directly"],ans:1},
+  {q:"Expectancy theory suggests motivation is strongest when employees believe effort will lead to performance and performance will lead to valued rewards. This is known as the ______ model.",opts:["Expectancy-instrumentality-valence","Hierarchy-equity-need","Control-feedback-reward","Goal-role-path"],ans:0},
+  {q:"Equity theory focuses on whether employees perceive their ______ as fair compared with others.",opts:["Personalities","Input-outcome ratios","Job descriptions","Organizational charts"],ans:1},
+  {q:"Reinforcement theory argues that behavior is shaped primarily by its ______.",opts:["Genetic basis","Level of abstraction","Consequences","Place in the hierarchy"],ans:2},
+  {q:"Under path-goal theory, an effective leader should ______.",opts:["Remove obstacles and clarify the path to goals","Avoid giving guidance to employees","Focus only on technical work","Let group norms replace all leadership"],ans:0},
+  {q:"Fiedler's contingency model proposes that leadership effectiveness depends on ______.",opts:["Matching leadership style with situational favorableness","Using one universal leadership style","Eliminating task structure","Removing all positional power"],ans:0},
+  {q:"A transformational leader is most likely to ______.",opts:["Maintain the status quo only","Inspire followers with vision and change","Rely only on punishments","Avoid long-term goals"],ans:1},
+  {q:"Control that takes place before actual work begins is called ______ control.",opts:["Feedback","Concurrent","Feedforward","External"],ans:2},
+  {q:"Control that focuses on results after the work has been completed is called ______ control.",opts:["Anticipatory","Feedback","Concurrent","Preventive"],ans:1},
+  {q:"The marketing concept holds that organizational goals are achieved best by ______.",opts:["Producing as much as possible","Matching competitor prices exactly","Satisfying target customer needs better than competitors","Focusing only on short-term sales volume"],ans:2},
+  {q:"The production concept assumes that consumers favor products that are ______.",opts:["Highly advertised and luxurious","Widely available and affordable","Customized for every buyer","Sold only through exclusive channels"],ans:1},
+  {q:"The societal marketing concept asks companies to balance company profits, consumer wants, and ______.",opts:["Employee promotions","Distributor bargaining power","Society's long-run interests","Stock market volatility"],ans:2},
+  {q:"Which of the following is one of the traditional 4Ps of marketing?",opts:["Process","People","Price","Partnership"],ans:2},
+  {q:"The first step in the marketing research process is to ______.",opts:["Choose a sample","Define the problem and research objectives","Develop the final report","Test product packaging"],ans:1},
+  {q:"Data collected specifically for a current research project are called ______ data.",opts:["Secondary","Archival","Primary","Historical"],ans:2},
+  {q:"When researchers collect data by watching relevant people, actions, and situations, they are using ______ research.",opts:["Experimental","Observational","Causal","Syndicated"],ans:1},
+  {q:"Market segmentation means dividing a market into ______.",opts:["Unrelated geographic territories only","Distinct groups of buyers with different needs or behaviors","Equal-sized groups for budgeting purposes","Distribution centers by sales volume"],ans:1},
+  {q:"Age, income, occupation, and gender are variables used in ______ segmentation.",opts:["Psychographic","Behavioral","Demographic","Benefit"],ans:2},
+  {q:"Lifestyle, personality, and social class are commonly used in ______ segmentation.",opts:["Demographic","Geographic","Psychographic","Industrial"],ans:2},
+  {q:"Usage rate, loyalty status, and benefits sought are examples of ______ segmentation variables.",opts:["Behavioral","Demographic","Geographic","Macroeconomic"],ans:0},
+  {q:"After segmenting the market, the next major step is to ______.",opts:["Abandon positioning decisions","Choose target segments to serve","Stop analyzing customers","Eliminate all competition"],ans:1},
+  {q:"Positioning is the act of designing an offering so that it occupies a ______ in the minds of target customers.",opts:["Random place","Clear, distinctive, and desirable place","Low-cost distribution route","Short-term promotional schedule"],ans:1},
+  {q:"The core product represents the ______ the customer is really buying.",opts:["Package color","Warranty card","Fundamental benefit or service","Logo design"],ans:2},
+  {q:"Brand equity refers to the ______ of consumer response to a branded product compared with an unbranded one.",opts:["Negative legal effect","Neutral accounting effect","Differential effect","Seasonal effect"],ans:2},
+  {q:"In new product development, the stage that turns an idea into a detailed version meaningful to consumers is ______.",opts:["Idea screening","Concept development and testing","Commercialization","Business analysis"],ans:1},
+  {q:"In the product life cycle, the stage marked by rapid market acceptance and rising profits is the ______ stage.",opts:["Decline","Maturity","Introduction","Growth"],ans:3},
+  {q:"A company sets a high initial price for a new product to skim maximum revenues from willing buyers. This is ______ pricing.",opts:["Penetration","Skimming","Value-based","Promotional"],ans:1},
+  {q:"A company sets a low initial price to penetrate the market quickly and win a large market share. This is ______ pricing.",opts:["Skimming","Prestige","Penetration","Captive-product"],ans:2},
+  {q:"Break-even analysis helps managers determine the sales volume needed to ______.",opts:["Maximize brand awareness","Cover total costs","Eliminate all competition","Raise perceived quality"],ans:1},
+  {q:"Value-based pricing starts with ______.",opts:["The seller's cost structure only","Competitors' advertising budgets","Buyers' perceptions of value","Channel margins alone"],ans:2},
+  {q:"A marketing channel is a set of interdependent organizations that help make a product available for ______.",opts:["Government inspection only","Manufacturing redesign","Use or consumption by consumers or business users","Internal accounting review"],ans:2},
+  {q:"A vertical marketing system links producers, wholesalers, and retailers so that they ______.",opts:["Compete independently with no coordination","Act as a unified system","Avoid contractual relationships","Eliminate all channel conflict permanently"],ans:1},
+  {q:"The promotion mix includes advertising, public relations, personal selling, sales promotion, and ______.",opts:["Warehousing","Direct and digital marketing","Product design","Market segmentation"],ans:1},
+  {q:"Integrated marketing communications means the company carefully coordinates its communication tools to deliver a ______ message.",opts:["Different message in each channel","Clear, consistent, and compelling","Low-cost and inflexible","Product-only and price-only"],ans:1}
+];
+
+let questions = [...ALL_QUESTIONS];
+let currentIdx = 0;
+let answered = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let shuffled = false;
+let wrongOnlyMode = false;
+let wrongIndices = [];
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function shuffleQuestions() {
+  shuffled = !shuffled;
+  const btn = document.getElementById('shuffleBtn');
+  if (shuffled) {
+    questions = shuffle([...ALL_QUESTIONS]);
+    btn.classList.add('active');
+    btn.textContent = '🔀 Đã xáo trộn';
+  } else {
+    questions = [...ALL_QUESTIONS];
+    btn.classList.remove('active');
+    btn.textContent = '🔀 Xáo trộn';
+  }
+  resetStats();
+  renderQuestion();
+}
+
+function toggleMode() {
+  wrongOnlyMode = !wrongOnlyMode;
+  const btn = document.getElementById('modeBtn');
+  if (wrongOnlyMode && wrongIndices.length > 0) {
+    questions = wrongIndices.map(i => ALL_QUESTIONS[i]);
+    btn.classList.add('active');
+    btn.textContent = '📖 Tất cả câu';
+    document.getElementById('totalStat').textContent = questions.length;
+  } else {
+    wrongOnlyMode = false;
+    questions = shuffled ? shuffle([...ALL_QUESTIONS]) : [...ALL_QUESTIONS];
+    btn.classList.remove('active');
+    btn.textContent = '📖 Chỉ câu sai';
+    document.getElementById('totalStat').textContent = 348;
+  }
+  resetStats();
+  renderQuestion();
+}
+
+function resetStats() {
+  currentIdx = 0;
+  answered = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  updateStats();
+  document.getElementById('completionScreen').classList.remove('visible');
+  document.getElementById('quizArea').style.display = '';
+}
+
+function resetQuiz() {
+  wrongOnlyMode = false;
+  shuffled = false;
+  questions = [...ALL_QUESTIONS];
+  wrongIndices = [];
+  document.getElementById('shuffleBtn').classList.remove('active');
+  document.getElementById('shuffleBtn').textContent = '🔀 Xáo trộn';
+  document.getElementById('modeBtn').classList.remove('active');
+  document.getElementById('modeBtn').textContent = '📖 Chỉ câu sai';
+  document.getElementById('totalStat').textContent = 348;
+  resetStats();
+  renderQuestion();
+}
+
+function updateStats() {
+  document.getElementById('doneStat').textContent = answered;
+  document.getElementById('correctStat').textContent = correctCount;
+  document.getElementById('wrongStat').textContent = wrongCount;
+  const total = questions.length;
+  const pct = total > 0 ? (answered / total * 100).toFixed(1) : 0;
+  document.getElementById('progressText').textContent = `${answered} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderQuestion() {
+  if (currentIdx >= questions.length) {
+    showCompletion();
+    return;
+  }
+
+  const q = questions[currentIdx];
+  const total = questions.length;
+
+  document.getElementById('qNumber').textContent = `CÂU ${currentIdx + 1} / ${total}`;
+  document.getElementById('qText').textContent = q.q;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+
+  const labels = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-label">${labels[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => checkAnswer(i, q.ans, btn, q);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  // Re-animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'slideIn 0.4s ease';
+}
+
+function checkAnswer(selected, correct, clickedBtn, q) {
+  // Disable all buttons
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  answered++;
+
+  const feedbackEl = document.getElementById('feedback');
+  const titleEl = document.getElementById('feedbackTitle');
+  const bodyEl = document.getElementById('feedbackBody');
+
+  if (selected === correct) {
+    correctCount++;
+    clickedBtn.classList.add('correct');
+    feedbackEl.className = 'feedback correct-fb';
+    feedbackEl.style.display = 'block';
+    titleEl.className = 'feedback-title correct-title';
+    titleEl.textContent = '✅ Chính xác!';
+
+    const encouragements = [
+      'Tuyệt vời! Bạn nắm vững khái niệm này rồi!',
+      'Xuất sắc! Tiếp tục phát huy nhé!',
+      'Đúng rồi! Bạn đang rất ổn đấy!',
+      'Perfect! Kiến thức vững chắc!',
+      'Bingo! Bạn hiểu đúng hoàn toàn!'
+    ];
+    bodyEl.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+    spawnParticles();
+  } else {
+    wrongCount++;
+    clickedBtn.classList.add('wrong');
+
+    // Highlight correct answer
+    allBtns[correct].classList.add('show-correct');
+
+    feedbackEl.className = 'feedback wrong-fb';
+    feedbackEl.style.display = 'block';
+    titleEl.className = 'feedback-title wrong-title';
+    titleEl.textContent = '❌ Chưa đúng!';
+
+    const labels = ['A', 'B', 'C', 'D'];
+    bodyEl.innerHTML = `Đáp án đúng là <strong style="color:var(--correct)">${labels[correct]}. ${q.opts[correct]}</strong>.<br>
+    <span style="font-size:13px;color:var(--muted)">Hãy ghi nhớ khái niệm này để không mắc lại lần sau nhé!</span>`;
+
+    // Track wrong question
+    const origIdx = ALL_QUESTIONS.indexOf(q);
+    if (origIdx !== -1 && !wrongIndices.includes(origIdx)) {
+      wrongIndices.push(origIdx);
+    }
+  }
+
+  updateStats();
+  document.getElementById('nextBtn').className = 'next-btn visible';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  renderQuestion();
+}
+
+function showCompletion() {
+  document.getElementById('quizArea').style.display = 'none';
+  const screen = document.getElementById('completionScreen');
+  screen.classList.add('visible');
+
+  const total = questions.length;
+  const pct = total > 0 ? Math.round(correctCount / total * 100) : 0;
+  document.getElementById('finalScore').textContent = pct + '%';
+  document.getElementById('finalDetail').textContent =
+    `${correctCount} đúng / ${wrongCount} sai trong tổng số ${total} câu`;
+
+  // Big confetti burst
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => spawnParticles(true), i * 30);
+  }
+}
+
+function spawnParticles(big = false) {
+  const colors = ['#7c5cfc','#fc5c7d','#22c55e','#f4c430','#38bdf8'];
+  const count = big ? 3 : 1;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = '-20px';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    p.style.width = (6 + Math.random() * 8) + 'px';
+    p.style.height = (6 + Math.random() * 8) + 'px';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 4000);
+  }
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
