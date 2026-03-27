@@ -479,10 +479,198 @@
     .option-btn { font-size: 14px; padding: 13px 16px; }
     .stats-bar .stat { min-width: 80px; }
   }
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+  .login-overlay.hidden { display: none; }
+
+  .login-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 44px 40px;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.5s ease;
+  }
+  .login-box::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .login-logo { text-align: center; margin-bottom: 32px; }
+  .login-logo .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .login-logo h1 {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .login-logo p { color: var(--muted); font-size: 13px; }
+
+  .login-field { margin-bottom: 18px; }
+  .login-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .login-field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-field input:focus { border-color: var(--accent); }
+  .login-field input::placeholder { color: var(--muted); }
+
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 46px; }
+  .pw-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 18px; padding: 0; line-height: 1;
+    transition: color 0.2s;
+  }
+  .pw-toggle:hover { color: var(--accent); }
+
+  .login-error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 13px;
+    color: #ef4444;
+    margin-bottom: 18px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .login-error.visible { display: block; }
+
+  .login-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 13px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+  }
+  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,92,252,0.4); }
+  .login-btn:active { transform: translateY(0); }
+
+  .login-hint { text-align: center; margin-top: 18px; font-size: 12px; color: var(--muted); }
+
+  /* User bar */
+  .user-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .user-bar-left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .user-bar-left span.user-name { color: var(--accent); font-weight: 600; font-family: 'Space Mono', monospace; font-size: 12px; }
+  .user-bar-left .dot { width: 8px; height: 8px; background: var(--correct); border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px var(--correct); }
+  .logout-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    color: var(--muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--wrong); color: var(--wrong); }
 </style>
 </head>
 <body>
-<div class="container">
+
+<!-- ===== LOGIN OVERLAY ===== -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="badge">✦ Secured Access ✦</div>
+      <h1>MKG101<br>Ôn Thi Cuối Kỳ</h1>
+      <p>Đăng nhập để truy cập hệ thống ôn thi</p>
+    </div>
+
+    <div class="login-field">
+      <label>Tên đăng nhập</label>
+      <input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." autocomplete="username" />
+    </div>
+
+    <div class="login-field">
+      <label>Mật khẩu</label>
+      <div class="pw-wrap">
+        <input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
+        <button class="pw-toggle" onclick="togglePw()" id="pwToggleBtn" title="Hiện/Ẩn mật khẩu">👁</button>
+      </div>
+    </div>
+
+    <div class="login-error" id="loginError">❌ Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.</div>
+
+    <button class="login-btn" onclick="doLogin()">Đăng Nhập →</button>
+
+    <div class="login-hint">🔒 Tài khoản được cấp bởi giảng viên</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div class="container" id="mainApp" style="display:none">
+  <!-- User bar -->
+  <div class="user-bar">
+    <div class="user-bar-left">
+      <span class="dot"></span>
+      <span>Đang đăng nhập:</span>
+      <span class="user-name" id="displayUser">—</span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">⎋ Đăng xuất</button>
+  </div>
   <div class="header">
     <div class="badge">✦ Quizlet Mode ✦</div>
     <h1>MKG101<br>Ôn Thi Cuối Kỳ</h1>
@@ -548,6 +736,73 @@
 </div>
 
 <script>
+// ===== AUTH =====
+const ACCOUNTS = {
+  username: 'abchamhoc@.edu.com',
+  passwords: ['123455', '234566', '345677', '456788', '567899']
+};
+
+function doLogin() {
+  const u = document.getElementById('loginUsername').value.trim();
+  const p = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+
+  if (u === ACCOUNTS.username && ACCOUNTS.passwords.includes(p)) {
+    errEl.classList.remove('visible');
+    const slot = ACCOUNTS.passwords.indexOf(p) + 1;
+    const displayName = u + ' · Tài khoản #' + slot;
+    document.getElementById('displayUser').textContent = displayName;
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('mainApp').style.display = '';
+    renderQuestion();
+  } else {
+    errEl.classList.add('visible');
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+  }
+}
+
+function doLogout() {
+  if (!confirm('Bạn có chắc muốn đăng xuất?\nTiến độ ôn tập sẽ bị mất.')) return;
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').classList.remove('visible');
+  questions = [...ALL_QUESTIONS];
+  currentIdx = 0; answered = 0; correctCount = 0; wrongCount = 0;
+  shuffled = false; wrongOnlyMode = false; wrongIndices = [];
+  document.getElementById('shuffleBtn').classList.remove('active');
+  document.getElementById('shuffleBtn').textContent = '🔀 Xáo trộn';
+  document.getElementById('modeBtn').classList.remove('active');
+  document.getElementById('modeBtn').textContent = '📖 Chỉ câu sai';
+  document.getElementById('totalStat').textContent = 348;
+  updateStats();
+  document.getElementById('completionScreen').classList.remove('visible');
+  document.getElementById('quizArea').style.display = '';
+}
+
+function togglePw() {
+  const input = document.getElementById('loginPassword');
+  const btn = document.getElementById('pwToggleBtn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['loginUsername','loginPassword'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+});
+
+// ===== QUIZ =====
 const ALL_QUESTIONS = [
   {q:"Which term is defined as 'a group of people working together in a structured and coordinated fashion to achieve a set of goals'?",opts:["Organizing","Management","Organization","Efficiency"],ans:2},
   {q:"Which term is defined as 'the process of planning, organizing, leading, and controlling an organization's resources to achieve its goals'?",opts:["Efficiency","Interpersonal skills","Management","Conceptual skills"],ans:2},
@@ -1115,8 +1370,7 @@ function spawnParticles(big = false) {
   }
 }
 
-// Init
-renderQuestion();
 </script>
+</div><!-- end #mainApp -->
 </body>
 </html>
